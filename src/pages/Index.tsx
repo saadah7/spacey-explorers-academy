@@ -1,101 +1,115 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Avatar3D } from '@/components/Avatar3D';
-import { WebcamFeed } from '@/components/WebcamFeed';
-import { SatelliteBuilder } from '@/components/SatelliteBuilder';
-import { Quiz } from '@/components/Quiz';
+import { useState, useEffect } from 'react';
 import { Rocket, Satellite, Trophy, Star, Play, Award } from 'lucide-react';
+import { SimpleAvatar } from '@/components/SimpleAvatar';
+import { BasicWebcam } from '@/components/BasicWebcam';
+import { SatelliteBuilding } from '@/components/SatelliteBuilding';
+import { SimpleQuiz } from '@/components/SimpleQuiz';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<'welcome' | 'lesson' | 'building' | 'quiz' | 'complete'>('welcome');
-  const [webcamPermission, setWebcamPermission] = useState(false);
+  const [webcamAllowed, setWebcamAllowed] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [badges, setBadges] = useState<string[]>([]);
-  const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
+  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
 
-  const steps = {
-    welcome: 0,
-    lesson: 25,
-    building: 50,
-    quiz: 75,
-    complete: 100
-  };
-
+  // Calculate progress based on current step
   useEffect(() => {
-    setProgress(steps[currentStep]);
+    const stepProgress = {
+      welcome: 0,
+      lesson: 25,
+      building: 50,
+      quiz: 75,
+      complete: 100
+    };
+    setProgress(stepProgress[currentStep]);
   }, [currentStep]);
 
-  const requestWebcamPermission = async () => {
+  // Ask for webcam permission and start lesson
+  const startLearning = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      setWebcamPermission(true);
+      // Request camera permission
+      await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setWebcamAllowed(true);
       setCurrentStep('lesson');
-      // Stop the stream as we'll create a new one in the WebcamFeed component
-      stream.getTracks().forEach(track => track.stop());
     } catch (error) {
-      console.error('Error accessing webcam:', error);
+      console.log('Camera access denied:', error);
+      // Continue anyway - webcam is optional
+      setCurrentStep('lesson');
     }
   };
 
-  const handleLessonComplete = () => {
+  // Move from lesson to building phase
+  const finishLesson = () => {
     setCurrentStep('building');
-    setBadges(prev => [...prev, 'Space Knowledge']);
+    setEarnedBadges(prev => [...prev, 'Space Student']);
   };
 
-  const handleBuildingComplete = () => {
+  // Move from building to quiz phase
+  const finishBuilding = () => {
     setCurrentStep('quiz');
-    setBadges(prev => [...prev, 'Satellite Engineer']);
+    setEarnedBadges(prev => [...prev, 'Satellite Builder']);
   };
 
-  const handleQuizComplete = (score: number) => {
+  // Finish the quiz and complete the course
+  const finishQuiz = (score: number) => {
     setCurrentStep('complete');
     if (score >= 80) {
-      setBadges(prev => [...prev, 'Space Expert']);
+      setEarnedBadges(prev => [...prev, 'Space Expert']);
     } else {
-      setBadges(prev => [...prev, 'Space Explorer']);
+      setEarnedBadges(prev => [...prev, 'Space Explorer']);
     }
   };
 
   return (
-    <div className="min-h-screen bg-space-gradient relative overflow-hidden">
-      {/* Animated Stars Background */}
-      <div className="stars">
-        {[...Array(10)].map((_, i) => (
-          <div key={i} className="star" />
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900 relative">
+      {/* Simple stars background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Basic animated stars */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`
+            }}
+          />
         ))}
       </div>
 
-      {/* Main Content */}
+      {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Rocket className="w-10 h-10 text-blue-400 animate-pulse-glow" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <Rocket className="w-8 h-8 text-blue-400" />
+            <h1 className="text-3xl font-bold text-white">
               Spacey Academy
             </h1>
-            <Satellite className="w-10 h-10 text-purple-400 animate-float" />
+            <Satellite className="w-8 h-8 text-purple-400" />
           </div>
           <p className="text-xl text-gray-300">Build Your Own Satellite</p>
           
-          {/* Progress Bar */}
+          {/* Progress bar */}
           <div className="max-w-md mx-auto mt-6">
-            <Progress value={progress} className="h-2 bg-gray-800" />
-            <p className="text-sm text-gray-400 mt-2">{progress}% Complete</p>
+            <div className="bg-gray-700 rounded-full h-2">
+              <div 
+                className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-gray-400 text-sm mt-2">{progress}% Complete</p>
           </div>
 
           {/* Badges */}
-          {badges.length > 0 && (
-            <div className="flex justify-center gap-2 mt-4">
-              {badges.map((badge, index) => (
-                <Badge key={index} className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black animate-pulse-glow">
-                  <Award className="w-4 h-4 mr-1" />
+          {earnedBadges.length > 0 && (
+            <div className="flex justify-center gap-2 mt-4 flex-wrap">
+              {earnedBadges.map((badge, index) => (
+                <div key={index} className="bg-yellow-600 text-black px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                  <Award className="w-3 h-3" />
                   {badge}
-                </Badge>
+                </div>
               ))}
             </div>
           )}
@@ -103,131 +117,129 @@ const Index = () => {
 
         {/* Welcome Screen */}
         {currentStep === 'welcome' && (
-          <Card className="max-w-2xl mx-auto p-8 bg-gray-900/50 border-blue-500/20 backdrop-blur-sm">
-            <div className="text-center space-y-6">
-              <div className="relative">
-                <Avatar3D isAnimated={true} />
-              </div>
-              <h2 className="text-3xl font-bold text-white">Welcome to Space Academy!</h2>
-              <p className="text-gray-300 text-lg">
-                I'm Captain Cosmos, your AI space guide! Today we'll learn how to build satellites 
-                and explore the wonders of space engineering. Are you ready for an amazing journey?
-              </p>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-400">
-                  We'll need access to your camera and microphone for the best learning experience.
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gray-800 p-8 rounded-lg border border-blue-400">
+              <div className="text-center space-y-6">
+                <SimpleAvatar isAnimated={true} />
+                <h2 className="text-2xl font-bold text-white">Welcome to Space Academy!</h2>
+                <p className="text-gray-300 text-lg">
+                  Hi! I'm Captain Cosmos, and I'll teach you how to build satellites today! 
+                  We'll learn about space technology and build our very own satellite together.
                 </p>
-                <Button 
-                  onClick={requestWebcamPermission}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105"
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  Start Your Space Adventure
-                </Button>
+                <div className="space-y-4">
+                  <p className="text-gray-400 text-sm">
+                    We'll use your camera for the best learning experience (optional).
+                  </p>
+                  <button 
+                    onClick={startLearning}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-lg flex items-center gap-2 mx-auto transition-all hover:scale-105"
+                  >
+                    <Play className="w-5 h-5" />
+                    Start Space Adventure
+                  </button>
+                </div>
               </div>
             </div>
-          </Card>
+          </div>
         )}
 
         {/* Lesson Screen */}
-        {currentStep === 'lesson' && webcamPermission && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {currentStep === 'lesson' && (
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <Card className="p-6 bg-gray-900/50 border-blue-500/20 backdrop-blur-sm">
-                <Avatar3D isAnimated={isAvatarSpeaking} />
-              </Card>
+              <SimpleAvatar isAnimated={true} />
             </div>
             <div className="space-y-6">
-              <WebcamFeed />
-              <Card className="p-4 bg-gray-900/50 border-blue-500/20 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold text-white mb-3">Lesson: Satellite Basics</h3>
-                <div className="space-y-3 text-gray-300 text-sm">
-                  <p>🛰️ Satellites orbit Earth to provide communications, weather data, and GPS!</p>
-                  <p>⚡ Solar panels power satellites using energy from the Sun.</p>
-                  <p>📡 Antennas help satellites communicate with Earth.</p>
-                  <p>🔧 Every satellite needs: Power, Communication, and Control systems.</p>
+              {webcamAllowed && <BasicWebcam />}
+              <div className="bg-gray-800 p-4 rounded-lg border border-blue-400">
+                <h3 className="text-white font-bold mb-3">Lesson: Satellite Basics</h3>
+                <div className="space-y-2 text-gray-300 text-sm">
+                  <p>🛰️ Satellites orbit Earth to help us communicate and explore space!</p>
+                  <p>⚡ Solar panels give satellites power from the Sun.</p>
+                  <p>📡 Antennas let satellites talk to Earth.</p>
+                  <p>🔧 Every satellite needs power, communication, and control systems.</p>
                 </div>
-                <Button 
-                  onClick={handleLessonComplete}
-                  className="w-full mt-4 bg-green-600 hover:bg-green-700"
+                <button 
+                  onClick={finishLesson}
+                  className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded"
                 >
-                  I'm Ready to Build!
-                </Button>
-              </Card>
+                  Ready to Build! →
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Building Screen */}
         {currentStep === 'building' && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid lg:grid-cols-4 gap-6">
             <div className="lg:col-span-3">
-              <SatelliteBuilder onComplete={handleBuildingComplete} />
+              <SatelliteBuilding onComplete={finishBuilding} />
             </div>
             <div className="space-y-6">
-              <WebcamFeed />
-              <Card className="p-4 bg-gray-900/50 border-blue-500/20 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold text-white mb-3">Build Instructions</h3>
-                <div className="space-y-2 text-gray-300 text-sm">
+              {webcamAllowed && <BasicWebcam />}
+              <div className="bg-gray-800 p-4 rounded-lg border border-blue-400">
+                <h3 className="text-white font-bold mb-3">Building Guide</h3>
+                <div className="space-y-1 text-gray-300 text-sm">
                   <p>1. Add solar panels for power ⚡</p>
-                  <p>2. Install communication antennas 📡</p>
-                  <p>3. Add scientific instruments 🔬</p>
-                  <p>4. Test your satellite design 🚀</p>
+                  <p>2. Install antenna for communication 📡</p>
+                  <p>3. Add camera for science 🔬</p>
+                  <p>4. Install thrusters for control 🚀</p>
                 </div>
-              </Card>
+              </div>
             </div>
           </div>
         )}
 
         {/* Quiz Screen */}
         {currentStep === 'quiz' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <Quiz onComplete={handleQuizComplete} />
+              <SimpleQuiz onComplete={finishQuiz} />
             </div>
             <div className="space-y-6">
-              <WebcamFeed />
-              <Card className="p-4 bg-gray-900/50 border-blue-500/20 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold text-white mb-3">Quiz Time! 🧠</h3>
+              {webcamAllowed && <BasicWebcam />}
+              <div className="bg-gray-800 p-4 rounded-lg border border-blue-400">
+                <h3 className="text-white font-bold mb-3">Quiz Time! 🧠</h3>
                 <p className="text-gray-300 text-sm">
-                  Test your knowledge about satellites and space technology. 
-                  Answer all questions to earn your space certification!
+                  Test what you learned about satellites and space technology. 
+                  Answer the questions to earn your space certificate!
                 </p>
-              </Card>
+              </div>
             </div>
           </div>
         )}
 
         {/* Completion Screen */}
         {currentStep === 'complete' && (
-          <Card className="max-w-2xl mx-auto p-8 bg-gray-900/50 border-green-500/20 backdrop-blur-sm text-center">
-            <div className="space-y-6">
-              <div className="relative">
-                <Avatar3D isAnimated={true} />
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gray-800 p-8 rounded-lg border border-green-500 text-center">
+              <div className="space-y-6">
+                <SimpleAvatar isAnimated={true} />
+                <div className="text-4xl">🎉</div>
+                <h2 className="text-2xl font-bold text-white">Mission Complete!</h2>
+                <p className="text-gray-300 text-lg">
+                  Congratulations! You've successfully learned about satellites and completed 
+                  your space engineering mission. You're now a certified space explorer!
+                </p>
+                <div className="flex justify-center gap-3 flex-wrap">
+                  {earnedBadges.map((badge, index) => (
+                    <div key={index} className="bg-yellow-600 text-black px-4 py-2 rounded-full flex items-center gap-2">
+                      <Trophy className="w-4 h-4" />
+                      {badge}
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full flex items-center gap-2 mx-auto"
+                >
+                  <Star className="w-5 h-5" />
+                  Start New Mission
+                </button>
               </div>
-              <div className="text-6xl">🎉</div>
-              <h2 className="text-3xl font-bold text-white">Mission Accomplished!</h2>
-              <p className="text-gray-300 text-lg">
-                Congratulations! You've successfully completed the satellite building mission. 
-                You're now a certified space engineer!
-              </p>
-              <div className="flex justify-center gap-4 flex-wrap">
-                {badges.map((badge, index) => (
-                  <Badge key={index} className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black text-lg p-3 animate-pulse-glow">
-                    <Trophy className="w-5 h-5 mr-2" />
-                    {badge}
-                  </Badge>
-                ))}
-              </div>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-8 rounded-full"
-              >
-                <Star className="w-5 h-5 mr-2" />
-                Start New Mission
-              </Button>
             </div>
-          </Card>
+          </div>
         )}
       </div>
     </div>
