@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				space: {
+					dark: '#0a0a0a',
+					blue: '#1e40af',
+					purple: '#7c3aed',
+					cyan: '#06b6d4',
+					pink: '#ec4899',
+					gold: '#f59e0b'
 				}
 			},
 			borderRadius: {
@@ -84,11 +93,35 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'pulse-glow': {
+					'0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' },
+					'50%': { boxShadow: '0 0 30px rgba(59, 130, 246, 0.8)' }
+				},
+				'stars': {
+					'0%': { transform: 'translateY(0px)' },
+					'100%': { transform: 'translateY(-100vh)' }
+				},
+				'orbit': {
+					'0%': { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'stars': 'stars 20s linear infinite',
+				'orbit': 'orbit 10s linear infinite'
+			},
+			backgroundImage: {
+				'space-gradient': 'linear-gradient(135deg, #0a0a0a 0%, #1e1b4b 50%, #312e81 100%)',
+				'cosmic-gradient': 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)'
 			}
 		}
 	},
