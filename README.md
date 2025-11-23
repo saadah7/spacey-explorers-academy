@@ -12,7 +12,7 @@ This is an AI-powered interactive web lesson designed for young learners, guidin
 
 ## Tech Stack
 
-This project is built with:
+This project is built for spacey science selection test
 
 - Vite
 - TypeScript
